@@ -16,15 +16,11 @@ You’re a pirate broadcaster with a battered bus, a loud transmitter, and a sho
 
 2) **Broadcast**
    - Start transmitting.
-   - Choose content:
-     - **News** (spiky attention, steady donors)
-     - **Music** (fast audience growth)
-     - **Movies** (high donations, high heat/risk)
+   - Choose content: **News / Music / Movies** (each impacts viewership, cost, and heat).
 
 3) **Monitor**
    - Watch the **Police Radar**.
    - More power = more reach = **faster detection**.
-   - Heat/noise/stability are secondary pressures that force decisions.
 
 4) **Profit / Flee**
    - Collect **donations** while the signal is live.
@@ -34,31 +30,78 @@ You’re a pirate broadcaster with a battered bus, a loud transmitter, and a sho
 5) **Manage**
    - Spend donations on:
      - **Diesel**
-     - **Content licenses** (unlock/boost News/Music/Movies)
-     - **Equipment upgrades** (power efficiency, cooling, stealth)
+     - **Content licenses**
+     - **Equipment upgrades**
+     - **Staff**
+
+## UI layout — “Console View”
+Because the game is top-down, the UI should feel like a physical dashboard.
+
+### Top panel
+- **Viewership** (real-time)
+  - Drives donation rate
+- **Broadcast Strength** (slider)
+  - Higher range = more viewers
+  - Higher range = faster detection
+
+### Center view
+- **Bus Interior (top-down)**
+  - Shows staff positions, generator, broadcast gear
+
+### Bottom panel
+- **Police Radar**
+  - Visual “heat” meter showing police proximity / triangulation pressure
+- **Power / Fuel**
+  - Progress bars for **Battery**, **Diesel**, and **Generator** status
+- **Money**
+  - Current budget for upgrades and fuel
+
+## Key mechanics & constraints
+
+### Resource interdependence
+- **The Generator Dilemma**
+  - Generator consumes **Diesel** to charge **Batteries**
+  - But creates **electrical noise/heat**
+  - You must choose:
+    - Charge and stay dark, or
+    - Broadcast and drain the battery
+
+- **The Mobility Penalty**
+  - Broadcasting while driving increases your **Signature**
+  - Safer to transmit while stationary, but you are a sitting duck
+
+### Staff & content
+- **Staff hires**
+  - **DJ**: boosts viewership
+  - **Engineer**: slows battery drain
+  - **Lookout**: improves radar accuracy
+
+- **Programming**
+  - **Movies**: high viewership, high cost
+  - **News**: lower viewership, but can lower Police Heat if you report on them
+  - **Music**: baseline / flexible option (good growth, moderate heat)
 
 ## Systems (high level)
 ### Resources
-- **Diesel**: movement + generator runtime.
-- **Battery**: buffer; drains under load.
-- **Heat**: rises with power; forces cooldown or failure.
-- **Noise**: affects detection in close range.
-- **Attention / Detection**: the "police clock".
+- **Diesel**: movement + generator runtime
+- **Battery**: buffer; drains under broadcast load
+- **Heat / Noise**: rises with power & generator use; increases risk / forces downtime
+- **Attention / Detection**: the “police clock” (shown on radar)
 
 ### Threat model
-- **Police radar** is a proxy for triangulation progress.
-- Detection accelerates with:
+- Police response is driven by your signal:
   - transmit power
   - time on-air
-  - (optionally) repeated broadcasts in same area
+  - signature penalties (broadcasting while driving)
+  - repeated use of the same area (optional)
 
 ### Economy
 - Donations scale with:
-  - audience size
+  - viewership
   - content type
-  - quality (upgrades, licenses)
-- Spending choices determine build strategy:
-  - stealthy low-power long sessions vs loud short bursts.
+  - quality (upgrades, licenses, staff)
+- Strategy split:
+  - stealthy low-power long sessions vs loud short bursts
 
 ## Aesthetic & presentation
 - Chunky UI panels
@@ -68,7 +111,8 @@ You’re a pirate broadcaster with a battered bus, a loud transmitter, and a sho
 
 ## MVP scope (first playable)
 - One simple map with a few parking nodes
-- Bus interior HUD + radar
+- Bus interior HUD + police radar
 - Content choice (News/Music/Movies)
+- Broadcast strength slider
 - One pursuer type (signal van) + escalating response
-- Basic shop: diesel + one upgrade path
+- Basic shop: diesel + one upgrade path + one staff hire
