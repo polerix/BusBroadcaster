@@ -5,20 +5,113 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bus Broadcaster</title>
   <style>
-    html, body { margin:0; height:100%; background:#05060a; color:#e8ecff; font-family:system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
-    #app { display:flex; align-items:center; justify-content:center; height:100%; }
-    .card { max-width:720px; padding:24px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:16px; }
-    .muted { opacity:0.85; }
-    code { background:rgba(0,0,0,0.3); padding:2px 6px; border-radius:6px; }
+    :root{
+      --bg:#05060a;
+      --panel:rgba(255,255,255,0.06);
+      --panel2:rgba(255,255,255,0.04);
+      --border:rgba(255,255,255,0.14);
+      --text:#e8ecff;
+      --muted:rgba(232,236,255,0.72);
+      --accent:#ffd25f; /* sodium yellow */
+      --danger:#ff5c7a;
+      --good:#5dffb7;
+    }
+    html, body { margin:0; height:100%; background:var(--bg); color:var(--text); font-family:system-ui, -apple-system, Segoe UI, Roboto, sans-serif; overflow:hidden; }
+
+    .frame{ display:grid; grid-template-rows: 92px 1fr 132px; height:100%; gap:10px; padding:14px; box-sizing:border-box; }
+    .panel{ background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:12px 14px; box-sizing:border-box; }
+
+    /* Top panel */
+    .top{ display:grid; grid-template-columns: 1fr 320px 220px; align-items:center; gap:12px; }
+    .title{ font-weight:700; letter-spacing:0.02em; }
+    .subtitle{ font-size:12px; color:var(--muted); margin-top:2px; }
+
+    .btn{
+      appearance:none; border:1px solid var(--border); background:rgba(0,0,0,0.25);
+      color:var(--text); padding:10px 12px; border-radius:10px; cursor:pointer;
+      font-weight:600;
+    }
+    .btn[data-on="1"]{ border-color:rgba(255,210,95,0.55); background:rgba(255,210,95,0.10); color:var(--accent); }
+    .btn:disabled{ opacity:0.55; cursor:not-allowed; }
+
+    .stat{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; }
+    .stat .k{ font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; }
+    .stat .v{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size:14px; }
+
+    /* Center view */
+    .center{ padding:0; overflow:hidden; position:relative; }
+    #game{ width:100%; height:100%; display:block; }
+
+    /* Bottom panel */
+    .bottom{ display:grid; grid-template-columns: 1fr 360px 180px; gap:12px; align-items:stretch; }
+
+    .bar{ height:10px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.10); border-radius:999px; overflow:hidden; }
+    .bar > div{ height:100%; width:0%; background:var(--danger); }
+
+    #gameOver{ display:none; position:absolute; inset:14px; border-radius:14px; background:rgba(0,0,0,0.55); border:1px solid rgba(255,92,122,0.35);
+      padding:16px; box-sizing:border-box;
+    }
+    #gameOver h2{ margin:0 0 6px 0; color:var(--danger); }
+    #gameOver p{ margin:0 0 12px 0; color:var(--muted); }
+
+    .pill{ display:inline-block; padding:3px 8px; border:1px solid rgba(255,255,255,0.14); border-radius:999px; font-size:12px; color:var(--muted); }
   </style>
 </head>
 <body>
-  <div id="app">
-    <div class="card">
-      <h1>Bus Broadcaster</h1>
-      <p class="muted">Bootstrapping repo. Game code will live in <code>/src</code>.</p>
-      <p>Run locally: <code>python3 -m http.server 5173</code></p>
+  <div class="frame">
+
+    <!-- Top Panel -->
+    <div class="panel top">
+      <div>
+        <div class="title">Bus Broadcaster <span class="pill">Phase 1 MVP</span></div>
+        <div id="statusLine" class="subtitle">OFF AIR. Cooling down.</div>
+      </div>
+
+      <div class="stat">
+        <div>
+          <div class="k">Viewership</div>
+          <div class="v">—</div>
+        </div>
+        <div>
+          <div class="k">Broadcast Strength</div>
+          <div class="v">(coming)</div>
+        </div>
+      </div>
+
+      <button id="btnBroadcast" class="btn" data-on="0">Start Broadcast</button>
     </div>
+
+    <!-- Center View -->
+    <div class="panel center">
+      <canvas id="game"></canvas>
+      <div id="gameOver">
+        <h2>Game Over</h2>
+        <p>Police Heat reached 100%. Your location was triangulated.</p>
+        <button id="btnReset" class="btn">Reset Run</button>
+      </div>
+    </div>
+
+    <!-- Bottom Panel -->
+    <div class="panel bottom">
+      <div>
+        <div class="stat"><span class="k">Police Radar / Heat</span> <span id="heatValue" class="v">0%</span></div>
+        <div class="bar" aria-label="Police heat"><div id="heatBarFill"></div></div>
+        <div class="subtitle" style="margin-top:10px">Broadcasting increases Heat. Stop broadcasting to cool down.</div>
+      </div>
+
+      <div>
+        <div class="stat"><span class="k">Power / Fuel</span> <span class="v">(Phase 2)</span></div>
+        <div class="subtitle">Battery, diesel, generator bars will live here.</div>
+      </div>
+
+      <div>
+        <div class="stat"><span class="k">Money</span> <span class="v">$0</span></div>
+        <div class="subtitle">Donations arrive in Phase 2.</div>
+      </div>
+    </div>
+
   </div>
+
+  <script type="module" src="./src/main.js"></script>
 </body>
 </html>
