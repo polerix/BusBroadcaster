@@ -116,3 +116,21 @@ Because the game is top-down, the UI should feel like a physical dashboard.
 - Broadcast strength slider
 - One pursuer type (signal van) + escalating response
 - Basic shop: diesel + one upgrade path + one staff hire
+
+## Development phases (roadmap)
+
+### Phase 1: The “Minimal Viable Product” (MVP)
+- Basic top-down sprite of the bus
+- Toggle **Broadcast** on/off
+- A timer that increases **Police Heat** when broadcasting
+- Simple **Game Over** when Heat reaches 100%
+
+### Phase 2: Resource Management
+- Implement **Diesel** and **Battery** drain logic
+- Add the **Generator** toggle and the **Driving** vs. **Parked** states
+- Create the donation system based on **Viewership**
+
+### Phase 3: Content & Upgrades
+- Store menu to buy **news/movies**
+- Upgradable parts (e.g., **Long-range Antenna**, **Quiet Muffler**)
+- Random events (e.g., engine breakdown, stormy weather affecting signal)
