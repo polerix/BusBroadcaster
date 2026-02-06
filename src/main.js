@@ -22,6 +22,15 @@
   const elStrength = $('#strength');
   const elStrengthValue = $('#strengthValue');
 
+  const elBattery = $('#batteryValue');
+  const elBatteryBar = $('#batteryBarFill');
+  const elDiesel = $('#dieselValue');
+  const elDieselBar = $('#dieselBarFill');
+  const elMode = $('#modeValue');
+  const elMoney = $('#moneyValue');
+  const elGenerator = $('#btnGenerator');
+  const elDrive = $('#btnDrive');
+
   // State
   const state = {
     broadcasting: false,
@@ -37,6 +46,21 @@
     viewGainBase: 0.8,
     viewGainMax: 6.0,
     viewDecay: 1.2,
+
+    // Phase 2
+    battery: 100,
+    diesel: 100,
+    generatorOn: false,
+    driving: false,
+    money: 0,
+
+    // rates (units per second)
+    battDrainBase: 2.5,
+    battDrainMax: 10.0,
+    genChargeRate: 9.0,
+    genDieselRate: 3.5,
+    driveDieselRate: 2.2,
+    donationRate: 0.04, // $ per viewership-second baseline
   };
 
   function resize() {
@@ -50,25 +74,50 @@
 
   function setBroadcasting(on) {
     if (state.gameOver) return;
+    if (on && state.battery <= 0.1) return; // can't transmit with dead battery
+
     state.broadcasting = !!on;
     elBroadcast.textContent = state.broadcasting ? 'Stop Broadcast' : 'Start Broadcast';
     elBroadcast.dataset.on = state.broadcasting ? '1' : '0';
+
+    const mode = state.driving ? 'DRIVING' : 'PARKED';
     elStatus.textContent = state.broadcasting
-      ? 'TRANSMITTING… Police heat rising.'
+      ? `TRANSMITTING… (${mode}) Police heat rising.`
       : 'OFF AIR. Cooling down.';
   }
 
   function reset() {
     state.broadcasting = false;
+    state.generatorOn = false;
+    state.driving = false;
     state.heat = 0;
     state.viewership = 0;
+    state.battery = 100;
+    state.diesel = 100;
+    state.money = 0;
     state.gameOver = false;
     $('#gameOver').style.display = 'none';
     setBroadcasting(false);
+    if (elGenerator) { elGenerator.dataset.on = '0'; }
+    if (elDrive) { elDrive.dataset.on = '0'; }
   }
 
   elBroadcast.addEventListener('click', () => setBroadcasting(!state.broadcasting));
   $('#btnReset').addEventListener('click', reset);
+
+  if (elGenerator) {
+    elGenerator.addEventListener('click', () => {
+      state.generatorOn = !state.generatorOn;
+      elGenerator.dataset.on = state.generatorOn ? '1' : '0';
+    });
+  }
+  if (elDrive) {
+    elDrive.addEventListener('click', () => {
+      state.driving = !state.driving;
+      elDrive.dataset.on = state.driving ? '1' : '0';
+      if (elMode) elMode.textContent = state.driving ? 'DRIVING' : 'PARKED';
+    });
+  }
 
   function setStrength(v) {
     state.strength = clamp(v | 0, 0, 100);
@@ -128,12 +177,46 @@
     // update heat + viewership
     if (!state.gameOver) {
       const k = state.strength / 100;
+
+      // Phase 2: battery/diesel/generator/driving dynamics
+      // Generator burns diesel to charge battery, but adds signature pressure.
+      if (state.generatorOn && state.diesel > 0) {
+        const burn = state.genDieselRate * dt;
+        state.diesel = Math.max(0, state.diesel - burn);
+        const charge = state.genChargeRate * dt;
+        state.battery = clamp(state.battery + charge, 0, 100);
+        // generator adds some heat even if not broadcasting
+        state.heat += 0.35 * dt;
+        if (state.diesel <= 0.01) state.generatorOn = false;
+      }
+
+      // Driving drains diesel
+      if (state.driving) {
+        const burn = state.driveDieselRate * dt;
+        state.diesel = Math.max(0, state.diesel - burn);
+        if (state.diesel <= 0.01) state.driving = false;
+      }
+
       const heatRate = state.heatRateBase + (state.heatRateMax - state.heatRateBase) * k;
       const viewGain = state.viewGainBase + (state.viewGainMax - state.viewGainBase) * k;
+      const battDrain = state.battDrainBase + (state.battDrainMax - state.battDrainBase) * k;
 
       if (state.broadcasting) {
-        state.heat += heatRate * dt;
+        // mobility penalty: broadcasting while driving increases signature (heat rate)
+        const sig = state.driving ? 1.55 : 1.0;
+        state.heat += heatRate * dt * sig;
         state.viewership += viewGain * dt;
+        state.battery = Math.max(0, state.battery - battDrain * dt);
+
+        // donations based on viewership
+        state.money += state.viewership * state.donationRate * dt * (0.6 + 0.9 * k);
+
+        if (state.battery <= 0.01) {
+          state.broadcasting = false;
+          elBroadcast.textContent = 'Start Broadcast';
+          elBroadcast.dataset.on = '0';
+          elStatus.textContent = 'BATTERY EMPTY. OFF AIR.';
+        }
       } else {
         state.heat -= state.coolRate * dt;
         state.viewership -= state.viewDecay * dt;
@@ -141,6 +224,7 @@
 
       state.heat = clamp(state.heat, 0, 100);
       state.viewership = clamp(state.viewership, 0, 9999);
+      state.money = Math.max(0, state.money);
 
       if (state.heat >= 100) {
         state.gameOver = true;
@@ -156,6 +240,17 @@
     elHeat.textContent = `${state.heat.toFixed(0)}%`;
     elHeatBarFill.style.width = `${state.heat.toFixed(1)}%`;
     if (elView) elView.textContent = `${Math.floor(state.viewership)}`;
+
+    if (elBattery) elBattery.textContent = `${Math.floor(state.battery)}`;
+    if (elBatteryBar) elBatteryBar.style.width = `${state.battery.toFixed(1)}%`;
+
+    if (elDiesel) elDiesel.textContent = `${Math.floor(state.diesel)}`;
+    if (elDieselBar) elDieselBar.style.width = `${state.diesel.toFixed(1)}%`;
+
+    if (elMode) elMode.textContent = state.driving ? 'DRIVING' : 'PARKED';
+    if (elMoney) elMoney.textContent = `$${Math.floor(state.money)}`;
+    if (elGenerator) elGenerator.dataset.on = state.generatorOn ? '1' : '0';
+    if (elDrive) elDrive.dataset.on = state.driving ? '1' : '0';
 
     // render
     const w = canvas.clientWidth;

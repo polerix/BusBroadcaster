@@ -65,7 +65,7 @@
     <!-- Top Panel -->
     <div class="panel top">
       <div>
-        <div class="title">Bus Broadcaster <span class="pill">Phase 1 MVP</span></div>
+        <div class="title">Bus Broadcaster <span class="pill">Phase 2</span></div>
         <div id="statusLine" class="subtitle">OFF AIR. Cooling down.</div>
       </div>
 
@@ -103,13 +103,24 @@
       </div>
 
       <div>
-        <div class="stat"><span class="k">Power / Fuel</span> <span class="v">(Phase 2)</span></div>
-        <div class="subtitle">Battery, diesel, generator bars will live here.</div>
+        <div class="stat" style="margin-bottom:6px"><span class="k">Power / Fuel</span> <span class="v"><span id="modeValue">PARKED</span></span></div>
+
+        <div class="subtitle" style="margin:0 0 6px">Battery <span id="batteryValue">100</span>%</div>
+        <div class="bar" aria-label="Battery"><div id="batteryBarFill" style="background:var(--good)"></div></div>
+
+        <div class="subtitle" style="margin:10px 0 6px">Diesel <span id="dieselValue">100</span>%</div>
+        <div class="bar" aria-label="Diesel"><div id="dieselBarFill" style="background:var(--accent)"></div></div>
+
+        <div style="display:flex; gap:8px; margin-top:10px">
+          <button id="btnGenerator" class="btn" data-on="0" type="button">Generator</button>
+          <button id="btnDrive" class="btn" data-on="0" type="button">Drive</button>
+        </div>
+        <div class="subtitle" style="margin-top:8px">Generator burns diesel to charge battery. Broadcasting while driving increases signature.</div>
       </div>
 
       <div>
-        <div class="stat"><span class="k">Money</span> <span class="v">$0</span></div>
-        <div class="subtitle">Donations arrive in Phase 2.</div>
+        <div class="stat"><span class="k">Money</span> <span id="moneyValue" class="v">$0</span></div>
+        <div class="subtitle">Donations arrive while broadcasting (scaled by Viewership).</div>
       </div>
     </div>
 
