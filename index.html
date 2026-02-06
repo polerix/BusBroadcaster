@@ -34,6 +34,8 @@
     .btn[data-on="1"]{ border-color:rgba(255,210,95,0.55); background:rgba(255,210,95,0.10); color:var(--accent); }
     .btn:disabled{ opacity:0.55; cursor:not-allowed; }
 
+    input[type=range]{ accent-color: var(--accent); }
+
     .stat{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; }
     .stat .k{ font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; }
     .stat .v{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size:14px; }
@@ -70,11 +72,12 @@
       <div class="stat">
         <div>
           <div class="k">Viewership</div>
-          <div class="v">—</div>
+          <div class="v"><span id="viewershipValue">0</span></div>
         </div>
-        <div>
+        <div style="min-width:210px">
           <div class="k">Broadcast Strength</div>
-          <div class="v">(coming)</div>
+          <div class="v"><span id="strengthValue">50</span>%</div>
+          <input id="strength" type="range" min="0" max="100" value="50" style="width:100%" />
         </div>
       </div>
 

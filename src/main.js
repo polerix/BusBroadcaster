@@ -18,15 +18,25 @@
   const elHeatBar = $('#heatBarFill');
   const elBroadcast = $('#btnBroadcast');
   const elStatus = $('#statusLine');
+  const elView = $('#viewershipValue');
+  const elStrength = $('#strength');
+  const elStrengthValue = $('#strengthValue');
 
   // State
   const state = {
     broadcasting: false,
     heat: 0,
-    heatRate: 6.5, // % per second while broadcasting
-    coolRate: 3.0, // % per second while not broadcasting
+    heatRateBase: 4.5,  // %/s baseline at 0 strength
+    heatRateMax: 10.0,  // %/s at 100 strength
+    coolRate: 3.0,      // % per second while not broadcasting
     gameOver: false,
     tLast: 0,
+
+    strength: 50, // 0..100
+    viewership: 0,
+    viewGainBase: 0.8,
+    viewGainMax: 6.0,
+    viewDecay: 1.2,
   };
 
   function resize() {
@@ -51,6 +61,7 @@
   function reset() {
     state.broadcasting = false;
     state.heat = 0;
+    state.viewership = 0;
     state.gameOver = false;
     $('#gameOver').style.display = 'none';
     setBroadcasting(false);
@@ -58,6 +69,15 @@
 
   elBroadcast.addEventListener('click', () => setBroadcasting(!state.broadcasting));
   $('#btnReset').addEventListener('click', reset);
+
+  function setStrength(v) {
+    state.strength = clamp(v | 0, 0, 100);
+    if (elStrengthValue) elStrengthValue.textContent = String(state.strength);
+  }
+  if (elStrength) {
+    elStrength.addEventListener('input', () => setStrength(parseInt(elStrength.value || '0', 10)));
+    setStrength(parseInt(elStrength.value || '50', 10));
+  }
 
   function drawBusTopDown(cx0, cy0) {
     // Simple lo-fi sprite: bus body + windows
@@ -105,12 +125,22 @@
     const dt = state.tLast ? Math.min(0.05, (t - state.tLast) / 1000) : 0;
     state.tLast = t;
 
-    // update heat
+    // update heat + viewership
     if (!state.gameOver) {
-      if (state.broadcasting) state.heat += state.heatRate * dt;
-      else state.heat -= state.coolRate * dt;
+      const k = state.strength / 100;
+      const heatRate = state.heatRateBase + (state.heatRateMax - state.heatRateBase) * k;
+      const viewGain = state.viewGainBase + (state.viewGainMax - state.viewGainBase) * k;
+
+      if (state.broadcasting) {
+        state.heat += heatRate * dt;
+        state.viewership += viewGain * dt;
+      } else {
+        state.heat -= state.coolRate * dt;
+        state.viewership -= state.viewDecay * dt;
+      }
 
       state.heat = clamp(state.heat, 0, 100);
+      state.viewership = clamp(state.viewership, 0, 9999);
 
       if (state.heat >= 100) {
         state.gameOver = true;
@@ -125,6 +155,7 @@
     // UI
     elHeat.textContent = `${state.heat.toFixed(0)}%`;
     elHeatBarFill.style.width = `${state.heat.toFixed(1)}%`;
+    if (elView) elView.textContent = `${Math.floor(state.viewership)}`;
 
     // render
     const w = canvas.clientWidth;
