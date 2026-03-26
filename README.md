@@ -17,7 +17,7 @@ You are operating a hacked-together broadcast rig inside a bus, trying to keep t
 
 ## 🐚 Repository Structure
 ```
-/BusBroadcaster
+/bus-broadcaster
   /src      # game engine + logic
   /assets   # sprites, audio, data
   /docs     # design doc + lore
