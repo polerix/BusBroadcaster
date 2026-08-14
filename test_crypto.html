@@ -1,0 +1,10 @@
+<script type="module">
+import OBSWebSocket from 'https://cdn.jsdelivr.net/npm/obs-websocket-js@5.0.5/+esm';
+const obs = new OBSWebSocket();
+try {
+  await obs.connect('ws://127.0.0.1:4455', 'test');
+} catch (e) {
+  console.log("Error:", e.message);
+  document.body.innerHTML = e.stack || e.message;
+}
+</script>

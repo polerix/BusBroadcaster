@@ -1,0 +1,15 @@
+{
+  "name": "bus-broadcaster",
+  "version": "1.1.0",
+  "description": "Professional 24/7 Broadcast Automation Suite",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "serve": "npx serve -s ."
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}

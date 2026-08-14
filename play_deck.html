@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Play Deck - OBS Source</title>
+  <style>
+    :root {
+      --bg: #000;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0; height: 100%; width: 100%;
+      background: #000; color: #fff;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #render-root {
+      width: 1920px; height: 1080px; position: relative;
+      background: #000;
+      transform-origin: center center;
+    }
+    #local-video {
+      width: 100%; height: 100%; object-fit: contain; display: none;
+    }
+    #youtube-player-wrapper {
+      width: 100%; height: 100%; display: none;
+    }
+    #fallback-ui {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: url('./assets/ui/testpattern.svg') center center no-repeat;
+      background-size: contain;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="render-root">
+    <video id="local-video" preload="auto"></video>
+    <div id="youtube-player-wrapper"><div id="youtube-player"></div></div>
+    <div id="fallback-ui"></div>
+  </div>
+
+  <script>
+    function rescale() {
+      const root = document.getElementById('render-root');
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const scale = Math.min(w / 1920, h / 1080);
+      root.style.transform = `scale(${scale})`;
+    }
+    window.addEventListener('resize', rescale);
+    rescale();
+  </script>
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script src="./src/bus.js"></script>
+  <script src="./src/play_deck.js"></script>
+</body>
+</html>
